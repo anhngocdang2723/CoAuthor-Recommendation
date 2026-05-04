@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+      integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="card">
+      <div class="card-header" style="font-size: 20px; font-weight: bold; color: #080526;">Train sSFCM method</div>
+      <div class="card-body">
+
+        <div class="form-group">
+          <label for="dataset" style="font-size: 17px; color: #080526;">Choose co-author candidate dataset</label>
+        </br>
+          <input type="file" 
+                  multiple id="fileUpload" onclick="load_data()"/>
+        </div>
+
+        <div class="form-group">
+            <label for="m_parameter" style="font-size: 17px; color: #080526;">Enter m</label>
+            <input
+                type="number"
+                class="form-control"
+                id="m"
+                placeholder="Enter m..."
+            />
+        </div>
+        <div class="form-group">
+            <label for="epsilon_parameter" style="font-size: 17px; color: #080526;">Enter epsilon</label>
+            <input
+                type="number"
+                class="form-control"
+                id="eps"
+                placeholder="Enter epsilon..."
+            />
+        </div>
+        <div class="form-group">
+          <label for="m_parameter" style="font-size: 17px; color: #080526;">Enter maximum number of iterations</label>
+          <input
+              type="number"
+              class="form-control"
+              id="l"
+              placeholder="Enter l..."
+          />
+      </div>
+        <div class="form-group">
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="train()"
+            style="background-color: #080526; color: #ffffff; border: 2px solid #080526;"
+          >
+            Train  
+          </button>
+        </div>
+
+        <div class="form-group">
+          <p id="result0"></p>
+        </div>
+      </div>
+    </div>
+    
+
+    <div class="card">
+      <div class="card-header" style="font-size: 20px; font-weight: bold; color: #080526;">Recommendation</div>
+      <div class="card-body">
+
+        <div class="form-group">
+          <label for="fileUpload" style="font-size: 17px; color: #080526;">Choose co-author candidate table after clustering</label> </br>
+          <input type="file" 
+                 multiple id="modelUpload" 
+          />   
+        </div>
+
+        <div class="form-group">
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="get_all_authors()"
+            style="background-color: #080526; color: #ffffff;border: 2px solid #080526;"
+          >
+          Generate authors   
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label for="author_id" style="font-size: 17px; color: #080526;">Choose author</label>
+          <input
+            type="text"
+            class="form-control"
+            id="author_id"
+            list="author_name"
+            placeholder="Author id..."
+          />
+          <datalist id="author_name"></datalist>
+          <input type="hidden" name="answer" id="inputHidden">
+        </div>
+        
+        
+
+        <div class="form-group">
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="recommend()"
+            style="background-color: #080526; color: #ffffff;border: 2px solid #080526;"
+          >
+          Recommend   
+          </button>
+        </div>
+        <div class="form-group">
+          <p id="result1"></p>
+        </div>
+
+        <div class="card-footer" style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #f1f1f1; text-align: center; padding: 5px;">
+          <div class="form-group" id="result2"></div>
+          <div class="form-group" id="result3"></div>
+        </div>
+        
+      </div>
+    </div>
+    
+  </body>
+
+  <script>
+
+    function load_data() {
+      // const data_name = document.getElementById('fileUpload').files[0]['name'];
+      // console.log(data_name);
+    }
+
+    function train() {
+      const data_name = document.getElementById('fileUpload').files[0]['name'];
+      const m = document.getElementById('m').value;
+      const eps = document.getElementById('eps').value;
+      const l = document.getElementById('l').value;
+
+      fetch("http://127.0.0.1:5001/train", {
+        method: "POST",
+        body: JSON.stringify({ data_name: data_name, m: m , eps:eps, l:l}),
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      })
+      .then((res) => res.json())
+      .then((result) => {
+        // console.log(result);
+        show_training_results(result);
+      })
+    }
+
+    function show_authors(result){
+      var html = "";
+      for (let index = 0; index < result['id'].length; index++) {
+        html += "<option data-custom='" + result['id'][index] + "' value='" + result['first_name'][index] + " " + result['last_name'][index] + "-" + result['id'][index] + "'</option>";
+      }
+      console.log("Number of nodes:", result['id'].length);
+      return html;
+    }
+
+    // function get_value() {
+    //   var value = $("#author_id").val();
+    //   console.log(value)
+    //   console.log($("#author_name option[value='" + value + "']").data('custom'));
+    // }
+    
+    function get_all_authors() {
+      // const data_name = document.getElementById('fileUpload').files[0]['name'];
+      const data_name = document.getElementById('modelUpload').files[0]['name'];
+      fetch("http://127.0.0.1:5001/get_all_authors", {
+        method: "POST",
+        body: JSON.stringify({ 
+          data_name: data_name
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      })
+      .then((res) => res.json())
+      .then((result) => {
+        $("#author_name").html(show_authors(result));
+      })
+    }
+    
+    function recommend() {
+      var value = $("#author_id").val();
+      const author_id = $("#author_name option[value='" + value + "']").data('custom');
+      const table_name = document.getElementById('modelUpload').files[0]['name'];
+
+      fetch("http://127.0.0.1:5001/recommend", {
+        method: "POST",
+        body: JSON.stringify({ 
+          author_id:author_id,
+          table_name:table_name,
+          cluster_center: globalClusterCenter
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      })
+      .then((res) => res.json())
+      .then((result) => {
+        console.log(result['potential']);
+        show_recommneded_authors(result);
+      })
+    }
+    
+    function show_training_results(result) {
+      
+      // // Xóa nội dung cũ
+      // document.getElementById("result0").innerHTML = "";
+
+      // // Kiểm tra nếu có kết quả
+      // if (result && result.results) {
+      //     // Chuyển đổi chuỗi JSON thành đối tượng JavaScript
+      //     var resultData = JSON.parse(result.results);
+      //     console.log(result.results)
+
+      //     // Hiển thị kết quả trên giao diện
+      //     var html = "<div class='form-group'><div> Co-author candidates table after clustering: </div>";
+      //     html += "<table border='1'><tr>";
+
+      //     // Lặp qua các cột của DataFrame
+      //     for (var col in resultData) {
+      //         html += "<th>" + col + "</th>";
+      //     }
+
+      //     html += "</tr>";
+
+      //     // Lặp qua các dòng của DataFrame
+      //     for (var i = 0; i < resultData.length; i++) {
+      //         html += "<tr>";
+
+      //         // Lặp qua các cột của mỗi dòng
+      //         for (var col in resultData[i]) {
+      //             html += "<td>" + resultData[i][col] + "</td>";
+      //         }
+
+      //         html += "</tr>";
+      //     }
+
+      //     html += "</table>";
+
+      //     // Hiển thị bảng kết quả trong phần tử 'result0'
+      //     document.getElementById("result0").innerHTML = html;
+        
+        // Hiển thị bảng trong phần tử 'result0'
+        globalClusterCenter = result['cluster_center'];
+        var html = "<div class='form-group' style='font-size: 17px; color: #080526;'><div>  </div>";
+        html += "<div> Co-author candidate table after clustering by sSFCM method:  " + result['table_name'] + " is saved at Clustering_Results folder.</div> </div>";
+        // html += "<div> Cluster center (+1):  " + "[" + result['cluster_center'] + "]" + "</div> </div>";
+        document.getElementById("result0").innerHTML = html;
+    
+    }
+
+    
+    function show_recommneded_authors(result) {
+      var html = "<div class='form-group'><div style='font-size: 18px; font-weight: bold; color: #080526;'> Top candidates: " + "</div>";
+      for (var i = 0; i < 5; i++) {
+        html += "<div> " +result['name'][i] + " - " + result['potential'][i] + "<div>";
+      }
+      document.getElementById("result1").innerHTML = html;
+
+    }
+
+    // function draw_table(data, id, column_names) {
+    //   var html = "<div>" + data.length + "</div>";
+    //   var keys = [];
+    //   html += '<table border=="1"><tr>';
+    //   for (var i = 0; i < column_names.length; i++) {
+    //     html += "<td>" + column_names[i] + "</td>";
+    //   }
+    //   html += "</tr>";
+    //   for (var i = 0; i < data.length; i++) {
+    //     html += "<tr>";
+    //     for (key in data[i]) {
+    //       html += "<td>" + data[i][key] + "</td>";
+    //     }
+    //     html += "</tr>";
+    //   }
+    //   html += "</table>";
+    //   document.getElementById("result" + id).innerHTML = html;
+    // }
+
+    
+  </script>
+  <script
+    src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+    crossorigin="anonymous"
+  ></script>
+</html>
