@@ -1,0 +1,18 @@
+ * Serving Flask app 'train_recommend_sSMC_FCM'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5002
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 228-111-684
+127.0.0.1 - - [05/May/2026 09:34:27] "OPTIONS /train HTTP/1.1" 200 -
+/home/quangvd/project/CoAuthor-Recommendation/CoAuthor-Recommendation/Methods/sSMC_FCM_method.py:98: RuntimeWarning: invalid value encountered in divide
+  mau_so = sum(pow(self.D[i][k] / self.D[i], 2/(m-1)))  # type: ignore
+/home/quangvd/project/CoAuthor-Recommendation/CoAuthor-Recommendation/Methods/sSMC_FCM_method.py:98: RuntimeWarning: divide by zero encountered in divide
+  mau_so = sum(pow(self.D[i][k] / self.D[i], 2/(m-1)))  # type: ignore
+127.0.0.1 - - [05/May/2026 09:34:42] "POST /train HTTP/1.1" 200 -
+127.0.0.1 - - [05/May/2026 09:35:22] "OPTIONS /get_all_authors HTTP/1.1" 200 -
+127.0.0.1 - - [05/May/2026 09:35:22] "POST /get_all_authors HTTP/1.1" 200 -
+127.0.0.1 - - [05/May/2026 09:35:28] "OPTIONS /recommend HTTP/1.1" 200 -
+127.0.0.1 - - [05/May/2026 09:35:28] "POST /recommend HTTP/1.1" 200 -
