@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Tạo bảng ứng viên đồng tác giả</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
@@ -16,340 +16,255 @@
       integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA=="
       crossorigin="anonymous"
     />
-  </head>
-  <body>
-    <div class="card">
-      <div class="card-header" style="font-size: 20px; font-weight: bold; color: #080526;">Create co-author candidate table</div>
-      <div class="card-body">
+    <script>
 
-        <div class="form-group">
-          <label for="type-journal" style="font-size: 17px; color: #080526;"> Choose Topic of Journal</label> <br />
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              id="topic2"
-              value="22"
-            />
-            <label for="topic2" style="font-size: 17px; color: #080526;"> Journal of Molecular Biology</label><br />
-
-            <input
-              class="form-check-input"
-              type="checkbox"
-              id="topic3"
-              value="23"
-            />
-            <label for="topic3" style="font-size: 17px; color: #080526;"> Chemical Physics Letters</label><br />
-
-            <input
-              class="form-check-input"
-              type="checkbox"
-              id="topic4"
-              value="24"
-            />
-            <label for="topic4" style="font-size: 17px; color: #080526;">
-              Biochemical and Biophysical Research Communications</label
-            ><br />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <button
-            type="button"
-            class="btn btn-outline-primary w-25"
-            onclick="save_topics()"
-            style="background-color: #080526; color: #ffffff; border: 2px solid #080526;"
-          >
-            Save topics
-          </button>
-        </div>
-        <div class="form-group" id="dates_of_topics"></div>
-
-
-        <div class="form-group">
-          <label for="from_date" style="font-size: 17px; color: #080526;">Choose year from </label>
-          <input
-            type="number"
-            class="form-control w-25"
-            id="fromDate"
-            placeholder="From year..."
-          />
-        </div>
-        <div class="form-group">
-          <label for="to_date" style="font-size: 17px; color: #080526;">To year</label>
-          <input
-            type="number"
-            class="form-control w-25"
-            id="toDate"
-            placeholder="To year..."
-          />
-        </div>
-
-        <div class="form-group">
-          <button type="button" class="btn btn-primary w-25" onclick="query()" style="background-color: #080526; color: #ffffff; border: 2px solid #080526;">
-            Query papers, authors, paper-author
-          </button>
-
-          <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-            <a class="dropdown-item" href="#">Random</a>
-            <a class="dropdown-item" href="#">Normal</a>
-          </div>
-        </div>
-        <div class="form-group">
-          <button
-            type="button"
-            class="btn btn-primary w-25"
-            onclick="create_co_authors()"
-            style="background-color: #080526; color: #ffffff; border: 2px solid #080526;"
-          >
-            Create co-author table
-          </button>
-        </div>
-
-        <div class="form-group">
-          <button
-            type="button"
-            class="btn btn-primary w-25"
-            onclick="create_potential_co_authors()"
-            style="background-color: #080526; color: #ffffff; border: 2px solid #080526;"
-          >
-            Create potential co-author table
-          </button>
-        </div>
-
-        <div class="form-group w-25" id="time_slice">
-          <label for="time" style="font-size: 17px; color: #080526;">Choose time slice </label>
-          <input
-            type="number"
-            class="form-control"
-            id="year_slice"
-            placeholder="Enter year..."
-          />
-          <br />
-          <input
-            type="number"
-            class="form-control"
-            id="month_slice"
-            placeholder="Enter month..."
-          />
-          <br />
-          <input
-            type="number"
-            class="form-control"
-            id="day_slice"
-            placeholder="Enter day..."
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="name" style="font-size: 17px; color: #080526;">Enter the name for the co-author candidate table </label>
-          <input class="form-control w-25" type="text" name="" id="name_file_csv" placeholder="Input name of file to export...">
-          <br>
-          <button
-            type="button"
-            class="btn btn-outline-success w-25"
-            onclick="calculate_scores_and_label()"
-            style="background-color: #080526; color: #ffffff; border: 2px solid #080526;"
-          >
-            Compute scores
-          </button>
-        </div>
-      </div>
-      <div class="card-footer">
-        <div class="form-group" id="result0"></div>
-        <div class="form-group" id="result1"></div>
-        <div class="form-group" id="result2"></div>
-        <div class="form-group" id="result3"></div>
-      </div>
-    </div>
-<!-- Footer -->
-<footer class="page-footer font-small blue">
-
-
-</footer>
-<!-- Footer -->  </body>
-
-  <script>
-
-
-    function save_topics() {
-      const topics = [];
-      $(":checkbox:checked").each(function (i) {
-        topics[i] = $(this).val();
-      });
-      fetch("http://127.0.0.1:5000/get_dates_of_topics", {
-        method: "POST",
-        body: JSON.stringify({ topics: topics }),
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          console.log("Những năm mà các paper đó được viết: ", result["dates"]);
-          show_dates_of_topics(result["dates"]);
+      function fetchWithTimeout(url, options, timeoutMs) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        return fetch(url, {
+          ...options,
+          signal: controller.signal,
+        }).catch((error) => {
+          if (error.name === 'AbortError') {
+            throw new Error('Yêu cầu quá thời gian chờ, vui lòng thử lại.');
+          }
+          throw error;
+        }).finally(() => {
+          clearTimeout(timeoutId);
         });
-    }
-    function query() {
-      //const num_records = document.getElementById("inputSuccess").value;
-      const from_date = document.getElementById("fromDate").value;
-      const to_date = document.getElementById("toDate").value;
-      const topics = [];
-      $(":checkbox:checked").each(function (i) {
-        topics[i] = $(this).val();
-      });
-      fetch("http://127.0.0.1:5000/query", {
-        method: "POST",
-        body: JSON.stringify({
+      }
+
+      async function parseErrorMessage(res, fallbackMessage) {
+        try {
+          const body = await res.json();
+          if (body && body.error) {
+            return body.error;
+          }
+        } catch (e) {
+        }
+        return fallbackMessage;
+      }
+
+      function getSelectedTopics() {
+        const topics = [];
+        $(":checkbox:checked").each(function (i) {
+          topics[i] = $(this).val();
+        });
+        return topics;
+      }
+
+      function validateTopicsAndDates(topics, from_date, to_date) {
+        if (!topics || topics.length === 0) {
+          alert('Vui lòng chọn ít nhất một chủ đề.');
+          return false;
+        }
+        if (!from_date || !to_date) {
+          alert('Vui lòng nhập đầy đủ năm bắt đầu và năm kết thúc.');
+          return false;
+        }
+        return true;
+      }
+
+      function save_topics() {
+        const topics = getSelectedTopics();
+        if (!topics || topics.length === 0) {
+          alert('Vui lòng chọn ít nhất một chủ đề.');
+          return;
+        }
+        fetchWithTimeout("http://127.0.0.1:5000/get_dates_of_topics", {
+          method: "POST",
+          body: JSON.stringify({ topics: topics }),
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        }, 60000)
+          .then(async (res) => {
+            if (!res.ok) {
+              const message = await parseErrorMessage(res, 'Lỗi khi lấy khoảng năm của chủ đề.');
+              throw new Error(message);
+            }
+            return res.json();
+          })
+          .then((result) => {
+            console.log("Những năm mà các paper đó được viết: ", result["dates"]);
+            show_dates_of_topics(result["dates"]);
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+      }
+
+      function query() {
+        const from_date = document.getElementById("fromDate").value;
+        const to_date = document.getElementById("toDate").value;
+        const topics = getSelectedTopics();
+        if (!validateTopicsAndDates(topics, from_date, to_date)) {
+          return;
+        }
+        document.getElementById("result0").innerHTML = "<div style='font-size: 16px; color: #080526;'>⏳ Đang truy vấn dữ liệu...</div>";
+        fetchWithTimeout("http://127.0.0.1:5000/query", {
+          method: "POST",
+          body: JSON.stringify({
+            topics: topics,
+            from_date: from_date,
+            to_date: to_date,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        }, 120000)
+          .then(async (res) => {
+            if (!res.ok) {
+              const message = await parseErrorMessage(res, 'Lỗi khi truy vấn dữ liệu.');
+              throw new Error(message);
+            }
+            return res.json();
+          })
+          .then((result) => {
+            console.log("so luong paper", result["paper"][1].length);
+            console.log("so luong author", result["author"][1].length);
+            console.log("so luong paper_authors", result["paper_authors"][1].length);
+            show_query_res(
+              result["paper"][1].length,
+              result["author"][1].length,
+              result["paper_authors"][1].length
+            );
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+      }
+
+      function create_co_authors() {
+        const topics = getSelectedTopics();
+        const from_date = document.getElementById("fromDate").value;
+        const to_date = document.getElementById("toDate").value;
+        if (!validateTopicsAndDates(topics, from_date, to_date)) {
+          return;
+        }
+        document.getElementById("result1").innerHTML = "<div style='font-size: 16px; color: #080526;'>⏳ Đang tạo bảng đồng tác giả...</div>";
+        fetchWithTimeout("http://127.0.0.1:5000/create_co_authors", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({ topics: topics, from_date: from_date, to_date: to_date }),
+        }, 120000)
+          .then(async (res) => {
+            if (!res.ok) {
+              const message = await parseErrorMessage(res, 'Lỗi khi tạo bảng đồng tác giả.');
+              throw new Error(message);
+            }
+            return res.json();
+          })
+          .then((result) => {
+            console.log("so luong dong tac gia:", result["co_author"][1].length);
+            show_co_author_res(result["co_author"][1].length);
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+      }
+
+      function create_potential_co_authors() {
+        const topics = getSelectedTopics();
+        const from_date = document.getElementById("fromDate").value;
+        const to_date = document.getElementById("toDate").value;
+        if (!validateTopicsAndDates(topics, from_date, to_date)) {
+          return;
+        }
+        document.getElementById("result2").innerHTML = "<div style='font-size: 16px; color: #080526;'>⏳ Đang tạo bảng đồng tác giả tiềm năng...</div>";
+        fetchWithTimeout("http://127.0.0.1:5000/create_potential_co_authors", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({
+            topics: topics,
+            from_date: from_date,
+            to_date: to_date
+          }),
+        }, 120000)
+          .then(async (res) => {
+            if (!res.ok) {
+              const message = await parseErrorMessage(res, 'Lỗi khi tạo bảng đồng tác giả tiềm năng.');
+              throw new Error(message);
+            }
+            return res.json();
+          })
+          .then((result) => {
+            console.log("so luong ung vien", result["last_potential"][1].length);
+            show_potential_res(result["last_potential"][1].length);
+            updateFilenameField();
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+      }
+
+      function calculate_scores_and_label() {
+        const topics = getSelectedTopics();
+        const year_slice = document.getElementById("year_slice").value;
+        const month_slice = document.getElementById("month_slice").value;
+        const day_slice = document.getElementById("day_slice").value;
+        const from_date = document.getElementById("fromDate").value;
+        const to_date = document.getElementById("toDate").value;
+        const csv_file_name = document.getElementById("name_file_csv").value;
+
+        if (!validateTopicsAndDates(topics, from_date, to_date)) {
+          return;
+        }
+
+        let time_slice = "";
+        if (year_slice === "") {
+          alert("Vui lòng nhập năm!");
+          return;
+        }
+
+        time_slice += year_slice;
+        if (month_slice !== "") {
+          time_slice += "-" + month_slice;
+          if (day_slice !== "") {
+            time_slice += "-" + day_slice;
+          }
+        }
+
+        const body = JSON.stringify({
           topics: topics,
           from_date: from_date,
           to_date: to_date,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          console.log("so luong paper", result["paper"][1].length);
-          console.log("so luong author", result["author"][1].length);
-          console.log(
-            "so luong paper_authors",
-            result["paper_authors"][1].length
-          );
-
-          //view_query_result(result, ['1', '2', '3']);
-          show_query_res(
-            result["paper"][1].length,
-            result["author"][1].length,
-            result["paper_authors"][1].length
-          );
-        });
-    }
-
-    function create_co_authors() {
-      //const num_records = document.getElementById("inputSuccess").value;
-      const topics = [];
-      $(":checkbox:checked").each(function (i) {
-        topics[i] = $(this).val();
-      });
-      const from_date = document.getElementById("fromDate").value;
-      const to_date = document.getElementById("toDate").value;
-      fetch("http://127.0.0.1:5000/create_co_authors", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({ topics: topics, from_date: from_date, to_date: to_date }),
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          console.log("so luong dong tac gia:", result["co_author"][1].length);
-          //view_co_author_table(result, '1');
-          show_co_author_res(result["co_author"][1].length);
-        });
-    }
-
-    function create_potential_co_authors() {
-      //const num_records = document.getElementById("inputSuccess").value;
-      // const level = Number($("#level input[type=radio]:checked").val());
-      const topics = [];
-      $(":checkbox:checked").each(function (i) {
-        topics[i] = $(this).val();
-      });
-      const from_date = document.getElementById("fromDate").value;
-      const to_date = document.getElementById("toDate").value;
-      fetch("http://127.0.0.1:5000/create_potential_co_authors", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({
-          topics: topics,
-          from_date: from_date,
-          to_date: to_date
-        }),
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          console.log("so luong ung vien", result["last_potential"][1].length);
-          //view_potential_table(result, 1);
-          show_potential_res(result["last_potential"][1].length);
-        });
-    }
-
-    function calculate_scores_and_label() {
-      //const num_records = document.getElementById("inputSuccess").value;
-      // const level = Number($("#level input[type=radio]:checked").val());
-      const topics = [];
-      $(":checkbox:checked").each(function (i) {
-        topics[i] = $(this).val();
-      });
-      // const weight_type = $("#weight_type input[type=radio]:checked").val();
-      // const label_type = $("#label_type input[type=radio]:checked").val();
-      const year_slice = document.getElementById("year_slice").value;
-      const month_slice = document.getElementById("month_slice").value;
-      const day_slice = document.getElementById("day_slice").value;
-      const from_date = document.getElementById("fromDate").value;
-      const to_date = document.getElementById("toDate").value;
-      const csv_file_name = document.getElementById("name_file_csv").value;
-      var time_slice = "";
-      
-      if (year_slice == "") {
-        alert("Please enter year!");
-      } else {
-        time_slice += year_slice;
-        if (month_slice != "") {
-          time_slice += "-";
-          time_slice += month_slice;
-          if (day_slice != "") {
-            time_slice += "-";
-            time_slice += day_slice;
-          }
-        }
-      }
-      
-
-      if (time_slice != "") {
-        body = JSON.stringify({
-          // level: level,
-          topics: topics,
-          from_date: from_date,
-          to_date:to_date,
-          // weight_type: weight_type,
-          // label_type: label_type,
           time_slice: time_slice,
           csv_file_name: csv_file_name
         });
-      } else {
-        body = JSON.stringify({
-          // level: level,
-          topics: topics,
-          from_date: from_date,
-          to_date:to_date,
-          // weight_type: weight_type,
-          // label_type: label_type,
-          csv_file_name: csv_file_name
-        });
+
+        document.getElementById("result3").innerHTML = "<div style='font-size: 16px; color: #080526;'>⏳ Đang tính điểm...</div>";
+        fetchWithTimeout("http://127.0.0.1:5000/calculate_scores", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: body,
+        }, 300000)
+          .then(async (res) => {
+            if (!res.ok) {
+              const message = await parseErrorMessage(res, 'Lỗi khi tính điểm.');
+              throw new Error(message);
+            }
+            return res.json();
+          })
+          .then((result) => {
+            console.log(result);
+            show_score_res(result["name"], result["msg"], time_slice);
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
       }
-      fetch("http://127.0.0.1:5000/calculate_scores", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: body,
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          console.log(result);
-          show_score_res(result["name"], result["msg"], time_slice);
-        });
-    }
 
     function draw_table(data, id, column_names) {
       var html = "<div>" + data.length + "</div>";
@@ -389,7 +304,7 @@
       //   if (i < dates.length - 1) content += ", ";
       // }
       var html =
-        "<div>Time interval of Topics: <br>" +
+        "<div>Khoảng thời gian của chủ đề: <br>" +
         dates[0] +
         ' <i class="fas fa-angle-double-right"></i> ' +
         dates[dates.length - 1] +
@@ -399,41 +314,171 @@
       // document.getElementById("dates_of_topics").style.color = "blueviolet";
     }
     function show_query_res(paper_count, author_count, paper_authors_count) {
-      var html = "<div>Number of paper: " + paper_count + "</div>" + "<br>";
-      html += "<div>Number of author: " + author_count + "</div>" + "<br>";
-      html +=
-        "<div>Number of paper_author: " +
-        paper_authors_count +
-        "</div>" +
-        "<br>";
+      var html = "<div style='font-size: 16px; color: #080526; padding: 12px; background-color: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px;'>";
+      html += "<div style='margin: 6px 0;'><i class='fas fa-file'></i> <strong>Bài báo:</strong> " + paper_count + "</div>";
+      html += "<div style='margin: 6px 0;'><i class='fas fa-users'></i> <strong>Tác giả:</strong> " + author_count + "</div>";
+      html += "<div style='margin: 6px 0;'><i class='fas fa-link'></i> <strong>Quan hệ bài báo-tác giả:</strong> " + paper_authors_count + "</div>";
+      html += "</div>";
       document.getElementById("result0").innerHTML = html;
     }
     function show_co_author_res(co_author_count) {
-      var html =
-        "<div>Number of co_author: " + co_author_count + "</div>" + "<br>";
-      document.getElementById("result1").innerHTML += html;
+      var html = "<div style='font-size: 16px; color: #080526; padding: 12px; background-color: #f3e5f5; border-left: 4px solid #9c27b0; border-radius: 4px;'>";
+      html += "<div style='margin: 6px 0;'><i class='fas fa-handshake'></i> <strong>Đồng tác giả:</strong> " + co_author_count + "</div>";
+      html += "</div>";
+      document.getElementById("result1").innerHTML = html;
     }
     function show_potential_res(potential_count) {
-      var html =
-        "<div>Number of potential_co_author: " +
-        potential_count +
-        "</div>" +
-        "<br>";
-      document.getElementById("result2").innerHTML += html;
+      var html = "<div style='font-size: 16px; color: #080526; padding: 12px; background-color: #fce4ec; border-left: 4px solid #e91e63; border-radius: 4px;'>";
+      html += "<div style='margin: 6px 0;'><i class='fas fa-star'></i> <strong>Ứng viên tiềm năng:</strong> " + potential_count + "</div>";
+      html += "</div>";
+      document.getElementById("result2").innerHTML = html;
+      updateFilenameField();
     }
+    
+    function generateFilename() {
+      const topics = getSelectedTopics();
+      const from_date = document.getElementById("fromDate").value;
+      const to_date = document.getElementById("toDate").value;
+      const year_slice = document.getElementById("year_slice").value;
+      const month_slice = document.getElementById("month_slice").value;
+      const day_slice = document.getElementById("day_slice").value;
+      
+      if (!topics || topics.length === 0 || !from_date || !to_date || !year_slice) {
+        return "";
+      }
+      
+      // Format time_slice without hyphens: 2002, 202212, or 20021231
+      let time_slice = year_slice;
+      if (month_slice !== "") {
+        time_slice += month_slice.padStart(2, '0');
+        if (day_slice !== "") {
+          time_slice += day_slice.padStart(2, '0');
+        }
+      }
+      
+      const topic_codes = topics.join("_");
+      const filename = `Data_${topic_codes}_${from_date}_${to_date}_${time_slice}.csv`;
+      return filename;
+    }
+
+    function updateFilenameField() {
+      const filename = generateFilename();
+      const fileInput = document.getElementById("name_file_csv");
+      const suggestionDiv = document.getElementById("filename_suggestion");
+      
+      if (filename) {
+        fileInput.value = filename;
+        fileInput.style.backgroundColor = "#f0f8ff";
+        if (suggestionDiv) {
+          suggestionDiv.innerHTML = "<small style='color: #080526;'><i class='fas fa-lightbulb'></i> Tên file được tự động tạo</small>";
+        }
+      } else {
+        fileInput.value = "";
+        fileInput.style.backgroundColor = "#ffffff";
+        if (suggestionDiv) {
+          suggestionDiv.innerHTML = "";
+        }
+      }
+    }
+    
     function show_score_res(file_name, msg, time_slice) {
-      var html =
-        "<div> Correlation ratio (+1) - (-1) label for time slice " +
-        time_slice +
-        ": " +
-        msg[1] +
-        "--" +
-        msg[0] +
-        "</div>" +
-        "<br>";
-      document.getElementById("result3").innerHTML += html;
+      var html = "<div style='font-size: 16px; color: #080526; padding: 12px; background-color: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 4px;'>";
+      html += "<div style='margin: 6px 0;'><i class='fas fa-chart-bar'></i> <strong>Lát cắt thời gian:</strong> " + time_slice + "</div>";
+      html += "<div style='margin: 6px 0;'><strong>Correlation ratio:</strong></div>";
+      html += "<div style='margin-left: 20px;'>(+1): " + msg[1] + " | (-1): " + msg[0] + "</div>";
+      html += "<div style='margin: 12px 0; padding: 8px; background-color: #c8e6c9; border-radius: 3px;'>";
+      html += "<i class='fas fa-save'></i> <strong>File CSV:</strong> " + file_name;
+      html += "</div>";
+      html += "</div>";
+      document.getElementById("result3").innerHTML = html;
     }
   </script>
+  </head>
+  <body style="background-color: #f8f9fa; padding: 16px;">
+    <div class="card" style="max-width: 1200px; margin: 0 auto;">
+      <div class="card-header" style="font-size: 20px; font-weight: bold; color: #080526;">Tạo bảng ứng viên đồng tác giả</div>
+      <div class="card-body">
+
+        <div class="form-group">
+          <label for="type-journal" style="font-size: 17px; color: #080526;">Chọn chủ đề tạp chí</label> <br />
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="topic2" value="22" />
+            <label for="topic2" style="font-size: 17px; color: #080526;">Journal of Molecular Biology</label><br />
+
+            <input class="form-check-input" type="checkbox" id="topic3" value="23" />
+            <label for="topic3" style="font-size: 17px; color: #080526;">Chemical Physics Letters</label><br />
+
+            <input class="form-check-input" type="checkbox" id="topic4" value="24" />
+            <label for="topic4" style="font-size: 17px; color: #080526;">Biochemical and Biophysical Research Communications</label><br />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <button type="button" class="btn btn-outline-primary w-25" onclick="save_topics()" style="background-color: #080526; color: #ffffff; border: 2px solid #080526;">
+            Lưu chủ đề
+          </button>
+        </div>
+
+        <div class="form-group" id="dates_of_topics"></div>
+
+        <div class="form-group">
+          <label for="from_date" style="font-size: 17px; color: #080526;">Chọn năm từ </label>
+          <input type="number" class="form-control w-25" id="fromDate" placeholder="Từ năm..." />
+        </div>
+
+        <div class="form-group">
+          <label for="to_date" style="font-size: 17px; color: #080526;">Đến năm</label>
+          <input type="number" class="form-control w-25" id="toDate" placeholder="Đến năm..." />
+        </div>
+
+        <div class="form-group">
+          <button type="button" class="btn btn-primary w-25" onclick="query()" style="background-color: #080526; color: #ffffff; border: 2px solid #080526;">
+            Truy vấn bài báo, tác giả, quan hệ bài báo-tác giả
+          </button>
+        </div>
+
+        <div class="form-group">
+          <button type="button" class="btn btn-primary w-25" onclick="create_co_authors()" style="background-color: #080526; color: #ffffff; border: 2px solid #080526;">
+            Tạo bảng đồng tác giả
+          </button>
+        </div>
+
+        <div class="form-group">
+          <button type="button" class="btn btn-primary w-25" onclick="create_potential_co_authors()" style="background-color: #080526; color: #ffffff; border: 2px solid #080526;">
+            Tạo bảng đồng tác giả tiềm năng
+          </button>
+        </div>
+
+        <div class="form-group w-25" id="time_slice">
+          <label for="time" style="font-size: 17px; color: #080526;">Chọn lát cắt thời gian </label>
+          <input type="number" class="form-control" id="year_slice" placeholder="Nhập năm..." onchange="updateFilenameField()" />
+          <br />
+          <input type="number" class="form-control" id="month_slice" placeholder="Nhập tháng..." onchange="updateFilenameField()" />
+          <br />
+          <input type="number" class="form-control" id="day_slice" placeholder="Nhập ngày..." onchange="updateFilenameField()" />
+        </div>
+
+        <div class="form-group">
+          <label for="name" style="font-size: 17px; color: #080526;">Tên cho bảng ứng viên đồng tác giả </label>
+          <input class="form-control w-25" type="text" name="" id="name_file_csv" placeholder="Được tạo tự động từ các tham số trên..." readonly style="background-color: #f0f0f0; cursor: not-allowed;">
+          <div id="filename_suggestion" style="margin-top: 8px; font-size: 14px;"></div>
+          <br>
+          <button type="button" class="btn btn-outline-success w-25" onclick="calculate_scores_and_label()" style="background-color: #080526; color: #ffffff; border: 2px solid #080526;">
+            Tính điểm
+          </button>
+        </div>
+      </div>
+
+      <div class="card-footer" style="background-color: #f1f1f1;">
+        <div class="form-group" id="result0"></div>
+        <div class="form-group" id="result1"></div>
+        <div class="form-group" id="result2"></div>
+        <div class="form-group" id="result3"></div>
+      </div>
+    </div>
+
+    <footer class="page-footer font-small blue"></footer>
+  </body>
   <script
     src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"

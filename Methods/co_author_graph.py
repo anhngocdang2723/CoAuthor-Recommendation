@@ -23,7 +23,7 @@ class Vertice:
 
 class Co_Author_Graph:
     def __init__(self, db_path):
-        self.list_vertices = defaultdict(Vertice)
+        self.list_vertices = dict()
         self.adj = defaultdict(dict)
         self.time_patterns = set() # used to store all years of publication; could be month or smth else
         print(db_path)

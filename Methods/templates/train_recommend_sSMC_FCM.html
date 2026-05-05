@@ -1,64 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Huấn luyện và gợi ý đồng tác giả</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
       integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
       crossorigin="anonymous"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+      integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA=="
+      crossorigin="anonymous"
+    />
   </head>
-  <body>
-    <div class="card">
-      <div class="card-header" style="font-size: 20px; font-weight: bold; color: #080526;">Train sSMC-SFCM method</div>
+  <body style="background-color: #f8f9fa; padding: 16px;">
+    <div class="card" style="max-width: 1200px; margin: 0 auto;">
+      <div class="card-header" style="font-size: 20px; font-weight: bold; color: #080526;">Huấn luyện phương pháp sSMC-SFCM</div>
       <div class="card-body">
 
         <div class="form-group">
-          <label for="dataset" style="font-size: 17px; color: #080526;">Choose co-author candidate dataset</label>
+          <label for="dataset" style="font-size: 17px; color: #080526;">Chọn bộ dữ liệu bảng ứng viên đồng tác giả</label>
         </br>
           <input type="file" 
-                  multiple id="fileUpload" onclick="load_data()"/>
+              accept=".csv,text/csv" multiple id="fileUpload" onclick="load_data()"/>
         </div>
 
         <div class="form-group">
-            <label for="m_parameter" style="font-size: 17px; color: #080526;">Enter M</label>
+            <label for="m_parameter" style="font-size: 17px; color: #080526;">Nhập M</label>
             <input
                 type="number"
                 class="form-control"
                 id="m"
-                placeholder="Enter M..."
+                placeholder="Nhập M..."
             />
         </div>
 
         <div class="form-group">
-            <label for="m1_parameter" style="font-size: 17px; color: #080526;">Enter M'</label>
+            <label for="m1_parameter" style="font-size: 17px; color: #080526;">Nhập M'</label>
             <input
                 type="number"
                 class="form-control"
                 id="m1"
-                placeholder="Enter M'..."
+                placeholder="Nhập M'..."
             />
         </div>
 
         <div class="form-group">
-            <label for="epsilon_parameter" style="font-size: 17px; color: #080526;">Enter epsilon</label>
+            <label for="epsilon_parameter" style="font-size: 17px; color: #080526;">Nhập epsilon</label>
             <input
                 type="number"
                 class="form-control"
                 id="eps"
-                placeholder="Enter epsilon..."
+                placeholder="Nhập epsilon..."
             />
         </div>
         <div class="form-group">
-          <label for="m_parameter" style="font-size: 17px; color: #080526;">Enter maximum number of iterations</label>
+          <label for="m_parameter" style="font-size: 17px; color: #080526;">Nhập số vòng lặp tối đa</label>
           <input
               type="number"
               class="form-control"
               id="l"
-              placeholder="Enter l..."
+              placeholder="Nhập l..."
           />
       </div>
         <div class="form-group">
@@ -68,7 +74,7 @@
             onclick="train()"
             style="background-color: #080526; color: #ffffff; border: 2px solid #080526;"
           >
-            Train  
+            Huấn luyện  
           </button>
         </div>
 
@@ -79,14 +85,14 @@
     </div>
     
 
-    <div class="card">
-      <div class="card-header" style="font-size: 20px; font-weight: bold; color: #080526;">Recommendation</div>
+    <div class="card" style="max-width: 1200px; margin: 0 auto;">
+      <div class="card-header" style="font-size: 20px; font-weight: bold; color: #080526;">Gợi ý</div>
       <div class="card-body">
 
         <div class="form-group">
-            <label for="fileUpload" style="font-size: 17px; color: #080526;">Choose co-author candidate table after clustering</label> </br>
+            <label for="fileUpload" style="font-size: 17px; color: #080526;">Chọn bảng ứng viên đồng tác giả sau khi phân cụm</label> </br>
             <input type="file" 
-                   multiple id="modelUpload" 
+                   accept=".csv,text/csv" multiple id="modelUpload" 
             />   
         </div>
 
@@ -97,18 +103,18 @@
             onclick="get_all_authors()"
             style="background-color: #080526; color: #ffffff;border: 2px solid #080526;"
           >
-          Generate authors   
+          Tạo danh sách tác giả   
           </button>
         </div>
 
         <div class="form-group">
-          <label for="author_id" style="font-size: 17px; color: #080526;">Choose author</label>
+          <label for="author_id" style="font-size: 17px; color: #080526;">Chọn tác giả</label>
           <input
             type="text"
             class="form-control"
             id="author_id"
             list="author_name"
-            placeholder="Author id..."
+            placeholder="Mã tác giả..."
           />
           <datalist id="author_name"></datalist>
           <input type="hidden" name="answer" id="inputHidden">
@@ -122,7 +128,7 @@
             onclick="recommend()"
             style="background-color: #080526; color: #ffffff;border: 2px solid #080526;"
           >
-          Recommend   
+          Gợi ý   
           </button>
         </div>
         <div class="form-group">
@@ -138,6 +144,38 @@
   </body>
 
   <script>
+    var globalClusterCenter = null;
+
+    function fetchWithTimeout(url, options, timeoutMs) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      return fetch(url, {
+        ...options,
+        signal: controller.signal,
+      }).catch((error) => {
+        if (error.name === 'AbortError') {
+          throw new Error('Yêu cầu quá thời gian chờ, vui lòng thử lại.');
+        }
+        throw error;
+      }).finally(() => {
+        clearTimeout(timeoutId);
+      });
+    }
+
+    async function parseErrorMessage(res, fallbackMessage) {
+      try {
+        const body = await res.json();
+        if (body && body.error) {
+          return body.error;
+        }
+      } catch (e) {
+      }
+      return fallbackMessage;
+    }
+
+    document.addEventListener('submit', function(event) {
+      event.preventDefault();
+    });
 
     function load_data() {
       // const data_name = document.getElementById('fileUpload').files[0]['name'];
@@ -145,33 +183,84 @@
     }
 
     function train() {
-      const data_name = document.getElementById('fileUpload').files[0]['name'];
+      const trainBtn = document.querySelector('button[onclick="train()"]');
+      const fileInput = document.getElementById('fileUpload');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Vui lòng chọn một tệp trước');
+        return;
+      }
+      const data_name = fileInput.files[0]['name'];
+      if (!data_name.toLowerCase().endsWith('.csv')) {
+        alert('Vui lòng chọn tệp .csv trong thư mục Coauthor_Candidate_Tables');
+        return;
+      }
       const m = document.getElementById('m').value;
       const m1 = document.getElementById('m1').value;
       const eps = document.getElementById('eps').value;
       const l = document.getElementById('l').value;
+      
+      if (!m || !m1 || !eps || !l) {
+        alert('Vui lòng nhập đầy đủ các tham số');
+        return;
+      }
 
-      fetch("http://127.0.0.1:5002/train", {
+      document.getElementById("result0").innerHTML = "<div style='font-size: 17px; color: #080526;'>Đang huấn luyện, vui lòng chờ...</div>";
+      if (trainBtn) {
+        trainBtn.disabled = true;
+        trainBtn.textContent = 'Đang huấn luyện...';
+      }
+
+      fetchWithTimeout("http://127.0.0.1:5002/train", {
         method: "POST",
         body: JSON.stringify({ data_name: data_name, m: m, m1:m1, eps:eps, l:l}),
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
         },
+      }, 300000)
+      .then(async (res) => {
+        if (!res.ok) {
+          const message = await parseErrorMessage(res, 'Phản hồi mạng không hợp lệ');
+          throw new Error(message);
+        }
+        return res.json();
       })
-      .then((res) => res.json())
       .then((result) => {
-        // console.log(result);
+        console.log(result);
         show_training_results(result);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        alert('Lỗi khi huấn luyện: ' + error.message);
+      })
+      .finally(() => {
+        if (trainBtn) {
+          trainBtn.disabled = false;
+          trainBtn.textContent = 'Huấn luyện';
+        }
       })
     }
 
     function show_authors(result){
       var html = "";
-      for (let index = 0; index < result['id'].length; index++) {
-        html += "<option data-custom='" + result['id'][index] + "' value='" + result['first_name'][index] + " " + result['last_name'][index] + "-" + result['id'][index] + "'</option>";
+      if (!result || !result['id']) {
+        console.error("Invalid result structure:", result);
+        return html;
       }
-      console.log("Number of nodes:", result['id'].length);
+      
+      const ids = result['id'] || [];
+      const firstNames = result['first_name'] || [];
+      const lastNames = result['last_name'] || [];
+      
+      // Ensure all arrays have the same length
+      const len = Math.min(ids.length, firstNames.length, lastNames.length);
+      
+      for (let index = 0; index < len; index++) {
+        const firstName = firstNames[index] || "N/A";
+        const lastName = lastNames[index] || "N/A";
+        html += "<option data-custom='" + ids[index] + "' value='" + firstName + " " + lastName + "-" + ids[index] + "'</option>";
+      }
+      console.log("Number of nodes:", len);
       return html;
     }
 
@@ -182,8 +271,32 @@
     // }
 
     function get_all_authors() {
-      const data_name = document.getElementById('modelUpload').files[0]['name'];
-      fetch("http://127.0.0.1:5002/get_all_authors", {
+      const authorsBtn = document.querySelector('button[onclick="get_all_authors()"]');
+      const fileInput = document.getElementById('modelUpload');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Vui lòng chọn tệp kết quả phân cụm trước');
+        return;
+      }
+      const data_name = fileInput.files[0]['name'];
+      if (!data_name.toLowerCase().endsWith('.csv')) {
+        alert('Vui lòng chọn tệp .csv trong thư mục Clustering_Results');
+        return;
+      }
+      
+      // Validate filename format
+      const name_without_ext = data_name.replace('.csv', '');
+      const parts = name_without_ext.split('_');
+      if (parts.length < 5) {
+        alert('Tên tệp không đúng định dạng. Vui lòng sử dụng file từ thư mục Clustering_Results.');
+        return;
+      }
+      
+      document.getElementById("result1").innerHTML = "<div style='font-size: 17px; color: #080526;'>⏳ Đang tải danh sách tác giả...</div>";
+      if (authorsBtn) {
+        authorsBtn.disabled = true;
+        authorsBtn.textContent = 'Đang tải...';
+      }
+      fetchWithTimeout("http://127.0.0.1:5002/get_all_authors", {
         method: "POST",
         body: JSON.stringify({ 
           data_name: data_name
@@ -192,19 +305,63 @@
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
         },
+      }, 60000)
+      .then(async (res) => {
+        if (!res.ok) {
+          const message = await parseErrorMessage(res, 'Phản hồi mạng không hợp lệ');
+          throw new Error(message);
+        }
+        return res.json();
       })
-      .then((res) => res.json())
       .then((result) => {
+        if (!result || !result.id || result.id.length === 0) {
+          throw new Error('Không tìm thấy tác giả nào trong cơ sở dữ liệu. Vui lòng kiểm tra lại file.');
+        }
         $("#author_name").html(show_authors(result));
+        document.getElementById("result1").innerHTML = "<div style='font-size: 17px; color: #080526;'>✓ Đã tải danh sách tác giả (" + result.id.length + " người). Hãy chọn tác giả để gợi ý.</div>";
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        document.getElementById("result1").innerHTML = "<div style='font-size: 16px; color: #d32f2f; padding: 12px; background-color: #ffebee; border-left: 4px solid #d32f2f; border-radius: 4px;'><strong>❌ Lỗi:</strong> " + error.message + "</div>";
+      })
+      .finally(() => {
+        if (authorsBtn) {
+          authorsBtn.disabled = false;
+          authorsBtn.textContent = 'Tạo danh sách tác giả';
+        }
       })
     }
     
     function recommend() {
+      const recommendBtn = document.querySelector('button[onclick="recommend()"]');
       var value = $("#author_id").val();
+      if (!value) {
+        alert('Vui lòng chọn một tác giả trước');
+        return;
+      }
+      const modelInput = document.getElementById('modelUpload');
+      if (!modelInput.files || modelInput.files.length === 0) {
+        alert('Vui lòng chọn tệp kết quả phân cụm trước');
+        return;
+      }
       const author_id = $("#author_name option[value='" + value + "']").data('custom');
-      const table_name = document.getElementById('modelUpload').files[0]['name'];
+      if (!author_id) {
+        alert('Không tìm thấy tác giả đã chọn. Vui lòng bấm "Tạo danh sách tác giả" trước.');
+        return;
+      }
+      const table_name = modelInput.files[0]['name'];
+      if (!table_name.toLowerCase().endsWith('.csv')) {
+        alert('Vui lòng chọn tệp .csv trong thư mục Clustering_Results');
+        return;
+      }
 
-      fetch("http://127.0.0.1:5002/recommend", {
+      document.getElementById("result1").innerHTML = "<div style='font-size: 17px; color: #080526;'>⏳ Đang gợi ý, vui lòng chờ...</div>";
+      if (recommendBtn) {
+        recommendBtn.disabled = true;
+        recommendBtn.textContent = 'Đang gợi ý...';
+      }
+
+      fetchWithTimeout("http://127.0.0.1:5002/recommend", {
         method: "POST",
         body: JSON.stringify({ 
           author_id:author_id,
@@ -215,70 +372,90 @@
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
         },
+      }, 120000)
+      .then(async (res) => {
+        if (!res.ok) {
+          const message = await parseErrorMessage(res, 'Phản hồi mạng không hợp lệ');
+          throw new Error(message);
+        }
+        return res.json();
       })
-      .then((res) => res.json())
       .then((result) => {
-        console.log(result['potential']);
+        console.log("Recommend result:", result);
+        if (!result || !result['name'] || !result['score']) {
+          throw new Error('Không tìm thấy khuyến nghị cho tác giả này. Tác giả có thể chưa có đồng tác giả trong dữ liệu.');
+        }
+        if (result['name'].length === 0) {
+          throw new Error('Không có khuyến nghị nào được tìm thấy. Vui lòng thử với tác giả khác.');
+        }
         show_recommneded_authors(result);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        document.getElementById("result1").innerHTML = "<div style='font-size: 16px; color: #d32f2f; padding: 12px; background-color: #ffebee; border-left: 4px solid #d32f2f; border-radius: 4px;'><strong>❌ Lỗi:</strong> " + error.message + "</div>";
+      })
+      .finally(() => {
+        if (recommendBtn) {
+          recommendBtn.disabled = false;
+          recommendBtn.textContent = 'Gợi ý';
+        }
       })
     }
     
     function show_training_results(result) {
+      if (!result) {
+        alert('Lỗi: Máy chủ trả về kết quả rỗng');
+        return;
+      }
+      globalClusterCenter = result['cluster_center'];
+      var html = "<div class='form-group' style='font-size: 16px; color: #080526;'>";
+      html += "<div style='margin-bottom: 12px; padding: 10px; background-color: #e8f5e9; border-left: 4px solid #4caf50;'>";
+      html += "<strong style='color: #2e7d32;'>✓ Huấn luyện thành công!</strong>";
+      html += "</div>";
       
-      // // Xóa nội dung cũ
-      // document.getElementById("result0").innerHTML = "";
-
-      // // Kiểm tra nếu có kết quả
-      // if (result && result.results) {
-      //     // Chuyển đổi chuỗi JSON thành đối tượng JavaScript
-      //     var resultData = JSON.parse(result.results);
-      //     console.log(result.results)
-
-      //     // Hiển thị kết quả trên giao diện
-      //     var html = "<div class='form-group'><div> Co-author candidates table after clustering: </div>";
-      //     html += "<table border='1'><tr>";
-
-      //     // Lặp qua các cột của DataFrame
-      //     for (var col in resultData) {
-      //         html += "<th>" + col + "</th>";
-      //     }
-
-      //     html += "</tr>";
-
-      //     // Lặp qua các dòng của DataFrame
-      //     for (var i = 0; i < resultData.length; i++) {
-      //         html += "<tr>";
-
-      //         // Lặp qua các cột của mỗi dòng
-      //         for (var col in resultData[i]) {
-      //             html += "<td>" + resultData[i][col] + "</td>";
-      //         }
-
-      //         html += "</tr>";
-      //     }
-
-      //     html += "</table>";
-
-      //     // Hiển thị bảng kết quả trong phần tử 'result0'
-      //     document.getElementById("result0").innerHTML = html;
-        
-        // Hiển thị bảng trong phần tử 'result0'
-        globalClusterCenter = result['cluster_center'];
-        var html = "<div class='form-group' style='font-size: 17px; color: #080526;'><div>  </div>";
-        html += "<div> Co-author candidate table after clustering by sSMC-FCM method:  " + result['table_name'] + " is saved at Clustering_Results folder.</div> </div>";
-        // html += "<div> Cluster center (+1):  " + "[" + result['cluster_center'] + "]" + "</div> </div>";
-        document.getElementById("result0").innerHTML = html;
+      html += "<div style='margin: 8px 0;'><strong>File input:</strong> " + result['input_file'] + "</div>";
+      html += "<div style='margin: 8px 0;'><strong>File output:</strong> " + result['output_file'] + "</div>";
+      html += "<div style='margin: 8px 0;'><strong>Vị trí lưu:</strong> Thư mục " + result['output_path'] + "/</div>";
+      html += "<div style='margin: 12px 0; padding: 10px; background-color: #fff3e0; border-left: 4px solid #ff9800;'>";
+      html += "<strong style='color: #e65100;'>CHÚ Ý:</strong> Sử dụng file <strong>" + result['output_file'] + "</strong> cho bước gợi ý tiếp theo!";
+      html += "</div>";
+      html += "</div>";
+      
+      document.getElementById("result0").innerHTML = html;
     
     }
 
     
     function show_recommneded_authors(result) {
-      var html = "<div class='form-group' style='font-size: 18px; color: #080526;'><div style='font-size: 18px; font-weight: bold; color: #080526;'> Top candidates: " + "</div>";
-      for (var i = 0; i < 5; i++) {
-        html += "<div> " +result['name'][i] + " - " + result['potential'][i] + "<div>";
+      if (!result || !result['name'] || !result['score']) {
+        document.getElementById("result1").innerHTML = "<div style='font-size: 16px; color: #d32f2f; padding: 12px; background-color: #ffebee; border-left: 4px solid #d32f2f; border-radius: 4px;'><strong>❌ Lỗi:</strong> Kết quả gợi ý không hợp lệ. Vui lòng thử lại.</div>";
+        return;
       }
+      
+      if (result['name'].length === 0) {
+        document.getElementById("result1").innerHTML = "<div style='font-size: 16px; color: #ff9800; padding: 12px; background-color: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px;'><strong>ℹ️ Thông tin:</strong> Không tìm thấy khuyến nghị cho tác giả này. Tác giả có thể chưa có đồng tác giả trong dữ liệu phân cụm.</div>";
+        return;
+      }
+      
+      var html = "<div class='form-group' style='font-size: 16px; color: #080526;'>";
+      html += "<div style='margin-bottom: 12px; padding: 10px; background-color: #fff9c4; border-left: 4px solid #fbc02d;'>";
+      html += "<strong style='color: #f57f17;'>⭐ Kết quả gợi ý đồng tác giả (" + result['name'].length + " người)</strong>";
+      html += "</div>";
+      
+      html += "<div style='background-color: #f5f5f5; border-radius: 4px; padding: 12px;'>";
+      for (var i = 0; i < Math.min(5, result['name'].length); i++) {
+        const bgColor = i === 0 ? '#c8e6c9' : (i === 1 ? '#bbdefb' : (i === 2 ? '#ffe0b2' : '#f0f0f0'));
+        const icon = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : '→'));
+        const score = result['score'][i];
+        html += "<div style='margin: 8px 0; padding: 10px; background-color: " + bgColor + "; border-radius: 4px;'>";
+        html += "<strong style='color: #080526;'>" + icon + " #" + (i+1) + ": " + result['name'][i] + "</strong>";
+        html += "<div style='margin-left: 30px; margin-top: 4px; color: #555;'><i class='fas fa-signal'></i> Điểm: " + score.toFixed(4) + "</div>";
+        html += "</div>";
+      }
+      html += "</div>";
+      html += "</div>";
+      
       document.getElementById("result1").innerHTML = html;
-
     }
 
     // function draw_table(data, id, column_names) {

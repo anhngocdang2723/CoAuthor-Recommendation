@@ -1,17 +1,28 @@
 """Code for sSMC-FCM algorithm"""
-from typing_extensions import final
 import pandas as pd
 import numpy as np
 import math
 from random import random
-import random
 
 class sSMC_FCM():
     
     def __init__(self, *args, **kwargs):
-        self.X = np.zeros(1)
-        self.seed = None
-        self.c = 2
+        self.X: np.ndarray = np.zeros(1)
+        self.seed: int | None = None
+        self.c: int = 2
+        self.n: int = 0
+        self.p: int = 0
+        self.M: np.ndarray | None = None
+        self.U: np.ndarray | None = None
+        self.D: np.ndarray | None = None
+        self.V: np.ndarray | None = None
+        self.V_truoc: np.ndarray | None = None
+        self.index_x_giamsat: np.ndarray | None = None
+        self.label: np.ndarray | None = None
+        self.label_list: list = []
+        self.num_class: int = 0
+        self.num_supervisor: int = 0
+        self.count_class_cluster: np.ndarray | None = None
         return
    
     def read_data(self, path):
@@ -19,11 +30,11 @@ class sSMC_FCM():
         self.data_table = np.array(self.data)
 
     def preprocess_data(self, X, y):
-        self.n = X.shape[0] 
-        self.p = X.shape[1]
+        self.n = int(X.shape[0])
+        self.p = int(X.shape[1])
         self.label = y
-        self.label_list = pd.unique(y)
-        self.label_list = self.label_list.tolist()
+        label_unique = pd.unique(y)
+        self.label_list = label_unique.tolist() if hasattr(label_unique, 'tolist') else list(label_unique)
         self.num_class = len(self.label_list)
         self.X = np.array(X)
 
@@ -42,9 +53,9 @@ class sSMC_FCM():
         # print(self.M.tolist())
 
     def generate_V(self, seed):
-        self.X = pd.DataFrame(self.X)
-        self.V = self.X.sample(self.c, random_state=seed).values   
-        self.V_truoc=self.V   
+        X_df = pd.DataFrame(self.X)
+        self.V = X_df.sample(self.c, random_state=seed).values   
+        self.V_truoc = self.V   
         return   
 
     def generate_U(self):
@@ -56,7 +67,7 @@ class sSMC_FCM():
         self.D=np.zeros((self.n,self.c))
         for i in range(self.n):
             for k in range(self.c):
-                self.D[i][k]=math.sqrt(sum(pow(self.X[i]-self.V[k],2)))
+                self.D[i][k]=math.sqrt(sum(pow(self.X[i]-self.V[k],2)))  # type: ignore
         return
     
     def solve_mu(self,sum_mu_i,d_ik,m,m1,epsilon):# Tính nuy_ik (công thức 19) sử dụng pp lặp nhị phân
@@ -80,32 +91,32 @@ class sSMC_FCM():
     def update_U(self,m,m1,epsilon):
         self.update_D()
         for i in range(self.n):
-            if i not in self.index_x_giamsat:
+            if i not in self.index_x_giamsat:  # type: ignore
                 for k in range(self.c):
                     # print(f"D[{i}]: ",self.D[i])
                     # print(f"D[{i}][{k}]: ",self.D[i][k])
-                    mau_so = sum(pow(self.D[i][k] / self.D[i], 2/(m-1)))
+                    mau_so = sum(pow(self.D[i][k] / self.D[i], 2/(m-1)))  # type: ignore
                     #mau_so = np.nan_to_num(mau_so)
-                    self.U[i][k] = np.nan_to_num(1/mau_so)
-            elif i in self.index_x_giamsat:
-                d_min = np.amin(self.D[i])
-                d_i = self.D[i]/d_min
+                    self.U[i][k] = np.nan_to_num(1/mau_so)  # type: ignore
+            elif i in self.index_x_giamsat:  # type: ignore
+                d_min = np.amin(self.D[i])  # type: ignore
+                d_i = self.D[i]/d_min  # type: ignore
                 mu_i = np.zeros(self.c)
                 for j in range(self.c):
-                    if (self.M[i][j]==m):
+                    if (self.M[i][j]==m):  # type: ignore
                         mu_i[j]=1/pow( m *d_i[j]*d_i[j] , 1/(m-1) )
                 sum_mu_i=sum(mu_i)
                 for j in range(self.c):
-                    if (self.M[i][j]==m1):
+                    if (self.M[i][j]==m1):  # type: ignore
                         mu_i[j] = self.solve_mu(sum_mu_i, d_i[j], m, m1 , epsilon)
                         
-                self.U[i] = mu_i/sum(mu_i)
+                self.U[i] = mu_i/sum(mu_i)  # type: ignore
         return self.U
 
     def update_V(self):
         V_temp=np.zeros((self.c,self.p))
         for k in range(self.c):
-            temp=pow((self.U.T)[k],(self.M.T)[k])
+            temp=pow((self.U.T)[k],(self.M.T)[k])  # type: ignore
             tu_so=np.zeros(self.p)
             for i in range(self.n):
                 tu_so+=temp[i]*self.X[i]
@@ -115,8 +126,8 @@ class sSMC_FCM():
     def count_class(self):
         self.count_class_cluster = np.zeros((self.num_class,self.c), dtype="int64")
         for k in range(self.n):
-            k_class = self.label_list.index(self.label[k])
-            index_max = np.argmax(self.U[k])
+            k_class = self.label_list.index(self.label[k])  # type: ignore
+            index_max = np.argmax(self.U[k])  # type: ignore
             self.count_class_cluster[k_class][index_max] +=1 
         return self.count_class_cluster[1][0]
     
@@ -145,7 +156,7 @@ class sSMC_FCM():
             self.U, self.V = self.train_sSMC_FCM(m, m1, eps, l)
             self.num_supervisor = self.count_class()
             print(f"Number of supervisors: {self.num_supervisor}")
-            if self.num_supervisor == len(self.index_x_giamsat):
+            if self.num_supervisor == len(self.index_x_giamsat):  # type: ignore
                 break
             else:
                 m1 += 1 
@@ -154,7 +165,7 @@ class sSMC_FCM():
     def assign_label(self):
         self.new_label = np.zeros(self.n)
         for k in range(self.n):
-            index_max = np.argmax(self.U[k])
+            index_max = np.argmax(self.U[k])  # type: ignore
             if(index_max == 0):
                 self.new_label[k] = 1
             else:
@@ -165,7 +176,7 @@ class sSMC_FCM():
     def freeMemory(self):
         self.U = None
         self.M = None
-        self.c = None
+        self.c = 2  # Reset to default instead of None
         self.index_x_giamsat = None
         self.V = None
         self.D = None

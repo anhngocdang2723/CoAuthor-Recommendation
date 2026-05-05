@@ -6,18 +6,30 @@ import collections
 from sSMC_FCM_method import sSMC_FCM
 
 
-basedir = os.path.dirname((os.path.dirname(__file__)))
-results_path = os.path.join(basedir, 'D:/DATA/23A-IT-KHMT- BKHN/Kì 2 - 2022-2023/DADX/CODE/CoAuthor-Recommendation/Coauthor_Candidate_Tables')
-clusters_path = os.path.join(basedir, 'D:/DATA/23A-IT-KHMT- BKHN/Kì 2 - 2022-2023/DADX/CODE/CoAuthor-Recommendation/Clustering_Results')
-db_path = os.path.join(os.path.dirname(basedir), 'D:/DATA/23A-IT-KHMT- BKHN/Kì 2 - 2022-2023/DADX/CODE/CoAuthor-Recommendation/Database')
+basedir = os.path.dirname(os.path.dirname(__file__))
+results_path = os.path.join(basedir, 'Coauthor_Candidate_Tables')
+clusters_path = os.path.join(basedir, 'Clustering_Results')
+db_path = os.path.join(basedir, 'Database')
 
 
 def train(data_name,m,m1,eps,l):
+    # Normalize filename: remove .csv if present, will add back at the end
+    if data_name.lower().endswith('.csv'):
+        data_name = data_name[:-4]
+    
+    if not data_name:
+        raise ValueError('Tệp dữ liệu không hợp lệ.')
+
+    # Add .csv back for file path
+    data_name_with_ext = data_name + '.csv'
+    data_path = os.path.join(results_path, data_name_with_ext)
+    if not os.path.isfile(data_path):
+        raise FileNotFoundError(f"Không tìm thấy tệp dữ liệu: {data_name_with_ext}. Vui lòng chọn tệp trong Coauthor_Candidate_Tables.")
+
     m = int(m)
     m1 = int(m1)
     eps = float(eps)
     l = int(l)
-    data_path = results_path + "/" + data_name
     data = pd.read_csv(data_path)
     # print(data.shape)
 
@@ -44,14 +56,22 @@ def train(data_name,m,m1,eps,l):
     print(result)
 
     # Lưu kết quả vào file CSV
-    output_path = clusters_path + "/" + "sSMCFCM_" + data_name
+    output_filename = "sSMCFCM_" + data_name + ".csv"
+    output_path = os.path.join(clusters_path, output_filename)
     if os.path.exists(output_path):
         result.to_csv(output_path, index=False)
-        print(f"Kết quả đã được ghi đè lên '{data_name}'.")
+        print(f"Kết quả đã được ghi đè lên '{output_filename}'.")
     else:
         result.to_csv(output_path, index=False)
     
-    return json.dumps({"cluster_center":center_label[0].tolist(),"table_name": data_name})
+    return {
+        "cluster_center": center_label[0].tolist(),
+        "input_file": data_name_with_ext,
+        "output_file": output_filename,
+        "output_path": "Clustering_Results",
+        "status": "success",
+        "message": f"Huấn luyện thành công. File kết quả: {output_filename}"
+    }
 
 
     

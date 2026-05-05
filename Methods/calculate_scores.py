@@ -7,10 +7,9 @@ from flask import jsonify
 from query import create_potential_co_authors
 # direct path of database
 # db_path = "/home/lam/Documents/prj3_copy/prj3/data/db.sqlite3"
-basedir = os.path.dirname((os.path.dirname(__file__)))
+basedir = os.path.dirname(os.path.dirname(__file__))
 results_path = os.path.join(basedir, 'Coauthor_Candidate_Tables')
-par_prj = os.path.dirname(basedir)
-db_path = os.path.join(par_prj, 'D:/DATA/23A-IT-KHMT- BKHN/Kì 2 - 2022-2023/DADX/CODE/CoAuthor-Recommendation/Database')
+db_path = os.path.join(basedir, 'Database')
 
 from define_scores import list_co_authors_before_t, CommonNeighbor, AdamicAdar, JaccardCoefficient, PreferentialAttachment, ResourceAllocation, ShortestPath, CommonCountry
 
@@ -82,11 +81,13 @@ def calculate_scores_dynamic(topics, from_date, to_date, weight_type, graph, csv
             #     print("Done {}--{}---{}".format(id1, id2, datetime.now().time()))
         if csv_file_name == "":
             file_name = results_path + "/Data_" + "_".join(topics) + "_" + from_date + "_" + to_date + "_" + weight_type + "_dynamic.csv"
-        else: 
-            file_name = results_path + "/" + csv_file_name + ".csv"
+        else:
+            # Normalize filename: strip .csv if present, then add .csv once
+            csv_normalized = csv_file_name[:-4] if csv_file_name.lower().endswith('.csv') else csv_file_name
+            file_name = results_path + "/" + csv_normalized + ".csv"
         write_scores_to_csv(file_name, CommonNeighbor_list, AdamicAdar_list, JaccardCoefficient_list, PreferentialAttachment_list, ResourceAllocation_list, ShortestPath_list, CommonCountry_list, labels, cur, records)
 
-    return jsonify({"msg": (cnt_0, cnt_1), "name" : file_name})       
+    return {"msg": [cnt_0, cnt_1], "name": file_name}
 
 def calculate_scores_static(topics, from_date, to_date, graph, time_slice, csv_file_name):
     weight_type = "unweighted"
@@ -175,11 +176,13 @@ def calculate_scores_static(topics, from_date, to_date, graph, time_slice, csv_f
                 cnt_0 += 1
         if csv_file_name == "":
             file_name = results_path + "/Data_" + "".join(topics) + "_" + from_date + "_" + to_date  + "_" + time_slice + ".csv"
-        else: 
-            file_name = results_path + "/" + csv_file_name + ".csv"
+        else:
+            # Normalize filename: strip .csv if present, then add .csv once
+            csv_normalized = csv_file_name[:-4] if csv_file_name.lower().endswith('.csv') else csv_file_name
+            file_name = results_path + "/" + csv_normalized + ".csv"
         write_scores_to_csv(file_name, CommonNeighbor_list, AdamicAdar_list, JaccardCoefficient_list, PreferentialAttachment_list, ResourceAllocation_list, ShortestPath_list, CommonCountry_list, labels, cur, records)
 
-    return jsonify({"msg": (cnt_0, cnt_1), "name" : file_name}) 
+    return {"msg": [cnt_0, cnt_1], "name": file_name}
 
 def write_scores_to_csv(file_name, CommonNeighbor_list, AdamicAdar_list, JaccardCoefficient_list, PreferentialAttachment_list, ResourceAllocation_list, ShortestPath_list, CommonCountry_list, labels, cur, records):
     with open(file_name, "a+") as f:

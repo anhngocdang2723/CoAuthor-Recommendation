@@ -7,9 +7,9 @@ from collections import defaultdict
 import pandas as pd
 from train_sSFCM import *
 
-basedir = os.path.dirname(os.path.dirname((os.path.dirname(__file__))))
-db_path = os.path.join(basedir, 'D:/DATA/23A-IT-KHMT- BKHN/Kì 2 - 2022-2023/DADX/CODE/CoAuthor-Recommendation/Database')
-clusters_path = os.path.join(basedir, 'D:/DATA/23A-IT-KHMT- BKHN/Kì 2 - 2022-2023/DADX/CODE/CoAuthor-Recommendation/Clustering_Results')
+basedir = os.path.dirname(os.path.dirname(__file__))
+db_path = os.path.join(basedir, 'Database')
+clusters_path = os.path.join(basedir, 'Clustering_Results')
 
 
 def create_sub_db(topic, from_date, to_date):
@@ -124,10 +124,30 @@ def get_potential(id, adj, sub_db_name):  # this could be extended to find candi
 #         return json.dumps({"potential": "Invalid author"})
 
 def recommend(author_id, table_name,cluster_center):
-    list_recommend = defaultdict(int)
+    if table_name is None or str(table_name).strip() == "":
+        raise ValueError("table_name không hợp lệ.")
+    if cluster_center is None:
+        raise ValueError("cluster_center không hợp lệ.")
+
+    try:
+        author_id = int(author_id)
+    except (TypeError, ValueError):
+        raise ValueError("author_id phải là số nguyên.")
+
+    list_recommend = defaultdict(float)
     print(cluster_center)
     print(table_name)
-    data_path = clusters_path + "/" + table_name
+    
+    # Normalize filename: strip .csv if present, then add single .csv
+    table_name_normalized = str(table_name).strip()
+    if table_name_normalized.lower().endswith('.csv'):
+        table_name_normalized = table_name_normalized[:-4]
+    table_name_normalized = table_name_normalized + '.csv'
+    
+    data_path = clusters_path + "/" + table_name_normalized
+    if not os.path.isfile(data_path):
+        raise FileNotFoundError(f"Không tìm thấy bảng phân cụm: {table_name_normalized}")
+
     data = pd.read_csv(data_path)
 
     y = data['cluster_id']
@@ -138,21 +158,21 @@ def recommend(author_id, table_name,cluster_center):
     
     for i in range(len(data)):
         if (author_id == data[i][0] and y[i]==1):
-            list_recommend[data[i][1]] = np.linalg.norm(X[i] - cluster_center)
+            list_recommend[int(data[i][1])] = float(np.linalg.norm(X[i] - np.array(cluster_center)))
         if (author_id == data[i][1] and y[i]==1):
-            list_recommend[data[i][0]] = np.linalg.norm(X[i] - cluster_center)
+            list_recommend[int(data[i][0])] = float(np.linalg.norm(X[i] - np.array(cluster_center)))
 
     list_recommend = dict(sorted(list_recommend.items(), key=lambda item: item[1]))
     print(list_recommend)
     # get name of candidates
-    result = get_all_authors(table_name)
+    result = get_all_authors(table_name_normalized)
     records = json.loads(result)
     mapping = {}
     for idx in range(len(records['id'])):
         mapping[int(records['id'][idx])] = records["first_name"][idx] + " " + records["last_name"][idx] 
     list_name = []
     for cand in list_recommend.keys():
-        list_name.append(mapping[cand])
+        list_name.append(mapping.get(cand, f"Author {cand}"))
     return json.dumps({"potential": list(list_recommend.keys()), 'name': list_name, 'score': list(list_recommend.values())})
 
         

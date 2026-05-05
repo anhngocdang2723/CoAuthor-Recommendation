@@ -2,8 +2,8 @@ import sqlite3
 import json, os
 import numpy as np
 
-basedir = os.path.dirname(os.path.dirname((os.path.dirname(__file__))))
-db_path = os.path.join(basedir, 'D:/DATA/23A-IT-KHMT- BKHN/Kì 2 - 2022-2023/DADX/CODE/CoAuthor-Recommendation/Database')
+basedir = os.path.dirname(os.path.dirname(__file__))
+db_path = os.path.join(basedir, 'Database')
 
 def get_dates_of_topics(topics):
     with sqlite3.connect(db_path + '/db.sqlite3') as conn:
@@ -177,27 +177,131 @@ def create_potential_co_authors(topics, co_author_name, potential_co_author_name
 #         return json.dumps({"id": list(id), "first_name": list(first_name), "last_name": list(last_name)}) 
  
 def get_all_authors(data_name):
+    data_name = os.path.basename(data_name)
+    if data_name.endswith('.csv'):
+        data_name = data_name[:-4]
     arr = data_name.split('_')
-    topic = arr[2]
-    print("Topic: ",topic)
-    from_date = arr[3]
-    print("From date: ",from_date)
-    to_date = arr[4]
-    print("To date: ",to_date)
-    # topic = arr[1]
-    # from_date = arr[2]
-    # to_date = arr[3]
+    
+    # Handle both formats:
+    # Format 1 (Coauthor_Candidate_Tables): Data_22_2000_2003_20021231 or Data_22_23_2000_2003_20021231
+    # Format 2 (Clustering_Results): sSFCM_Data_22_2000_2003_20021231 or sSMCFCM_Data_22_2000_2003_20021231
+    
+    try:
+        # Always: last 3 parts are [from_date, to_date, time_slice]
+        # Parts in between: [prefix?], Data, [topics...], from_date, to_date, time_slice
+        
+        if len(arr) < 5:
+            raise ValueError(f"Invalid filename format: {data_name}. Expected at least 4 underscores.")
+        
+        # Parse from the end
+        time_slice = arr[-1]
+        to_date = arr[-2]
+        from_date = arr[-3]
+        
+        # Find the starting index based on prefix
+        start_idx = 0
+        if arr[0] in ['sSFCM', 'sSMCFCM', 'sSMC']:
+            # Format like: sSFCM_Data_22_2000_2003_20021231
+            if arr[1] != 'Data':
+                raise ValueError(f"Invalid clustering filename format: {data_name}")
+            start_idx = 2
+        else:
+            # Format like: Data_22_2000_2003_20021231
+            if arr[0] != 'Data':
+                raise ValueError(f"Invalid candidate filename format: {data_name}")
+            start_idx = 1
+        
+        # Topics are between 'Data' (or prefix) and from_date
+        topic_end_idx = len(arr) - 3
+        topics = arr[start_idx:topic_end_idx]
+        
+        if not topics:
+            raise ValueError(f"No topics found in filename: {data_name}")
+        
+        topic = topics[0]  # Use first topic for database file
+        
+    except (IndexError, ValueError) as e:
+        print(f"Error parsing filename '{data_name}': {e}")
+        # Return empty authors list as fallback
+        return json.dumps({
+            "id": [],
+            "first_name": [],
+            "last_name": [],
+        })
+    
+    print(f"Parsed - Topics: {topics}, From: {from_date}, To: {to_date}, DB Topic: {topic}")
+    
     with sqlite3.connect(db_path + "/subDB_" + topic + "_" + from_date + "_" + to_date +'.sqlite3') as conn:
         cur = conn.cursor()
-        cur.execute("ATTACH DATABASE '" + db_path + "/db.sqlite3' AS db")
-        query = ("select a.id, a.first_name, a.last_name from db.collab_author a\
-                  where a.id in (select id from author)  \
-                ")
-        print("Connect success!")
-        cur.execute(query)
-        result = cur.fetchall()
-        result = np.array(result)
-        id = result[:, 0] 
-        first_name = result[:, 1]
-        last_name = result[:, 2]
-        return json.dumps({"id": list(id), "first_name": list(first_name), "last_name": list(last_name)}) 
+        try:
+            cur.execute("ATTACH DATABASE '" + db_path + "/db.sqlite3' AS db")
+            query = ("select a.id, a.first_name, a.last_name from db.collab_author a\
+                      where a.id in (select id from author)  \
+                    ")
+            print("Connect success!")
+            cur.execute(query)
+            result = cur.fetchall()
+            
+            if not result:
+                # If no results, get authors from author table
+                cur.execute("select id from author")
+                ids = [row[0] for row in cur.fetchall()]
+                return json.dumps({
+                    "id": ids,
+                    "first_name": ["Author" for _ in ids],
+                    "last_name": [str(i) for i in ids],
+                })
+            
+            result = np.array(result)
+            if result.ndim < 2 or result.shape[1] < 3:
+                # Fallback if result has unexpected shape
+                ids = [row[0] for row in result] if result.ndim > 0 else []
+                return json.dumps({
+                    "id": ids,
+                    "first_name": ["Author" for _ in ids],
+                    "last_name": [str(i) for i in ids],
+                })
+            
+            id = list(result[:, 0])
+            first_name = [str(x) if x is not None else "N/A" for x in result[:, 1]]
+            last_name = [str(x) if x is not None else "N/A" for x in result[:, 2]]
+            
+            # Ensure all arrays have the same length
+            min_len = min(len(id), len(first_name), len(last_name))
+            id = id[:min_len]
+            first_name = first_name[:min_len]
+            last_name = last_name[:min_len]
+            
+            return json.dumps({"id": id, "first_name": first_name, "last_name": last_name})
+        except sqlite3.DatabaseError as e:
+            print(f"DatabaseError: {e}")
+            try:
+                cur.execute("select id from author")
+                ids = [row[0] for row in cur.fetchall()]
+                return json.dumps({
+                    "id": ids,
+                    "first_name": ["Author" for _ in ids],
+                    "last_name": [str(i) for i in ids],
+                })
+            except:
+                return json.dumps({
+                    "id": [],
+                    "first_name": [],
+                    "last_name": [],
+                })
+        except Exception as e:
+            print(f"Error in get_all_authors: {e}")
+            try:
+                cur.execute("select id from author")
+                ids = [row[0] for row in cur.fetchall()]
+                return json.dumps({
+                    "id": ids,
+                    "first_name": ["Author" for _ in ids],
+                    "last_name": [str(i) for i in ids],
+                })
+            except:
+                return json.dumps({
+                    "id": [],
+                    "first_name": [],
+                    "last_name": [],
+                })
